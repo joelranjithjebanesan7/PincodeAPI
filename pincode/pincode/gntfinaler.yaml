@@ -1,0 +1,364 @@
+swagger: '2.0'
+info:
+  title: GNT API
+  description: Giver gives N Taker takes
+  version: "1.0.0"
+# the domain of the service
+host: localhost:8000
+# array of all schemes that your API supports
+schemes:
+  - http
+# will be prefixed to all paths
+produces:
+  - application/json
+
+paths:
+
+  /gnt/offers:
+    get:
+      tags:
+        - Offers
+      summary: 'Offers'
+      description:
+        Offers for the possesions for which the giver provides.
+      responses:
+        200:
+          description: "An array of offers"
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/OfferToView'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+      security:
+        - token_auth: []
+
+    post:
+      tags:
+      - Offers
+      summary: "Create Offer"
+      operationId: 'addOffer'
+      description:
+        Place offer
+      consumes:
+      - 'application/json'
+      produces:
+      - 'application/json'
+      parameters:
+      - in: body
+        name: body
+        description: "Item object that needs to be added to the offer"
+        required: true
+        schema:
+          $ref: "#/definitions/OfferToCreate"
+      security:
+        - token_auth: []
+      responses:
+        405:
+          description: "Invalid input"
+  
+  
+  /gnt/offers/{offer_id}:
+    get:
+      tags:
+        - Offers
+      summary: 'Offer'
+      description:
+        Offer for the possesion for which the giver provides.
+      parameters:
+      - in: path
+        name: offer_id
+        type: string
+        description: offer id for the offer to view
+        required: true
+      responses: 
+        200:
+          description: Details of offers
+          schema:
+            type: object
+            items:
+              $ref: '#/definitions/OfferToView'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+      security:
+        - token_auth: []
+    put:
+      tags:
+      - "Offer"
+      summary: "Update an existing offer"
+      description: ""
+      operationId: "updateOffer"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - in: path
+        name: offer_id
+        type: string
+        description: offer id for the offer to edit
+        required: true
+      responses:
+        200:
+          description: "details for editing offer"
+          schema:
+            type: object
+            items:
+              $ref: "#/definitions/OfferToCreate"
+        400:
+          description: "Invalid ID supplied"
+        404:
+          description: "Offer not found"
+        405:
+          description: "Validation exception"
+      security:
+        - token_auth: []
+           
+    delete:
+      tags:
+      - "Offers"
+      summary: "Delete offer"
+      description: ""
+      operationId: "deleteOffer"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "offer_id"
+        type: string
+        in: "path"
+        description: "Offer id to delete offer"
+        required: true
+      responses:
+        400:
+          description: "Invalid ID supplied"
+        404:
+          description: "offer not found"
+      security:
+        - token_auth: []
+
+  /user/signup:
+    post:
+      tags:
+        - user
+      summary: Create user
+      description: This can only be done by the logged in user.
+      operationId: "createUser"
+      produces:
+        - application/json
+      parameters:
+        - in: body
+          name: body
+          description: Created user object
+          required: false
+          schema:
+            $ref: "#/definitions/User"
+      responses:
+        200:
+          description: An array of userdetail
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/login'
+        default:
+          description: successful operation
+          
+  /user/login:
+    get:
+      tags:
+      - "user"
+      summary: "Log user into the system"
+      description: ""
+      operationId: "loginUser"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "username"
+        in: "query"
+        description: "The user name for login"
+        required: true
+        type: "string"
+      - name: "password"
+        in: "query"
+        description: "The password for login in clear text"
+        required: true
+        type: "string"
+      responses:
+        200:
+          description: An array of userdetail
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/login'
+        400:
+          description: "Invalid username/password supplied"
+  /user/logout:
+    get:
+      tags:
+        - user
+      summary: Log out current logged in user session
+      description: ""
+      operationId: logoutUser
+      produces:
+        - application/json
+      responses:
+        default:
+          description:  you were logged out
+  
+  /user/gettoken/{user_id}:
+    post:
+      tags:
+      - user
+      summary: geting tocken by user_id
+      description: "token for the user for accessing"
+      parameters:
+      - in: path
+        name: "user_id"
+        type: string
+        required: true
+        description: "user_id to get token"
+      responses:
+        200:
+          description: "user token"
+          schema:
+            type: object
+            items:
+              $ref: '#/definitions/gettoken'
+        
+      
+
+      
+securityDefinitions:
+    token_auth:         # arbitrary name for the security scheme
+      type: apiKey
+      in: header       # can be "header", "query" or "cookie"
+      name: Authorization
+            
+definitions:
+  OfferToCreate:
+    type: object
+    properties:
+      offer_id :
+        type: string
+        description: "generated id for offer"
+      Item_name:
+        type: string
+        description: Item name.
+      offer_started_date:
+        type: string
+        description: "offer started date"
+      offer_end_date:
+        type: string
+        description: "offer ends date"
+      note_on_offer:
+        type: string
+        description: Details about the offer.
+      properties:
+        type: array
+        description: Properties of object.
+        items:
+            $ref: "#/definitions/Property"
+      offer_status:
+        type: string
+        description: "status of offer by choices"
+  OfferToView:
+    type: object
+    properties:
+      user_name:
+        type: string
+        description: Name of the user
+      Item_name:
+        type: string
+        description: Item name.
+      Note_on_offer:
+        type: string
+        description: Details about the offer.
+      Properties:
+        type: array
+        description: Properties of object.
+        items:
+            $ref: "#/definitions/Property"
+      valid_from:
+        type: string
+      valid_to:
+        type: string
+  
+  Property:
+    type: object
+    properties:
+      Condition_of_product:
+        type: string
+        description: Describes condiion of the item such as service,maintenance.
+      Appearance:
+        type: string
+        description: Describes the appearance of the item.
+  User:
+    type: object
+    properties:
+      username:
+        type: string
+        description : "name of the user"
+      password:
+        type: string
+        description: "password for the user"
+      address:
+        type: object
+      phone_number:
+        type: number
+        description: "phone number to contact user"
+      latitude:
+          type: number
+          description: "latitude of the user"
+      longitude:
+          type: number
+          description: "longitudee of the user"
+
+  gettoken:
+    type: object
+    properties:
+      username:
+        type: string
+      tokens_data:
+        $ref: "#/definitions/tokendata"        
+        
+  
+  
+  login:
+    type: object
+    properties:
+      username:
+        type: string
+      password:
+        type : string
+      location:
+        type: string
+        
+  tokendata:
+     type: object
+     properties:
+       access_token:
+         type: string
+         description: token for accessing
+       refresh_token:
+         type: string
+         description: token for refreshing
+       access_token_valid_till:
+         type: string
+       refresh_token_valid_till:
+         type: string 
+        
+ 
+        
+  Error:
+    type: object
+    properties:
+      code:
+        type: integer
+        format: int32
+      message:
+        type: string
+      fields:
+        type: string

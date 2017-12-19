@@ -1,0 +1,105 @@
+swagger: '2.0'
+info:
+  title: Pincode API
+  description: Know your pincode details with the Pincode API
+  version: "1.0.0"
+# the domain of the service
+host: localhost:8000
+# array of all schemes that your API supports
+schemes:
+  - http
+# will be prefixed to all paths
+produces:
+  - application/json
+paths:
+  /pincodes/:
+    get:
+      summary: Pincode Lists
+      description:
+       Pincode Lists givesthe list of all pincodes of india and gives the entire deatils about the 
+       postal office, which gives a list of details of 10 offices per page.
+      
+      tags:
+        - Pincodes
+      responses:
+        200:
+          description: An array of pincodes
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Pincode'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+  
+  
+  /pincodes/{pincode}:
+    get:
+      summary: Pincode Details
+      description: 
+       Pincode details returns the detail of pincode of a postal area in India. It
+       will give you a details about the office type,taluk and delivery type of the
+       post office related to the pincode.
+      parameters:
+        - name: pincode
+          in: path
+          description: pincode
+          type: number
+          required: true
+      tags:
+        - Pincodes
+      responses:
+        200:
+          description: An array of list of a pincode details
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Pincode'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+    
+
+            
+definitions:
+  Pincode:
+    type: object
+    properties:
+      
+      id:
+        type: number
+        description: Id of the pincode.
+      officename:
+        type: string
+        description: Display name of office.
+      pincode:
+        type: number
+        description: Pincode number.
+      officetype:
+        type: string
+        description: Display type of office either branch or sub office.
+      Delieverystatus:
+        type: string
+        description: Delivery status of the pincode either delivery or non-deivery.
+      regionname:
+        type: string
+        description: Region where the post office located.
+      circlename:
+        type: string
+        description: Area where the post office belong tothe pincode works.
+      taluk:
+        type: string
+        description: Taluk location of the post office.
+       
+  Error:
+    type: object
+    properties:
+      code:
+        type: integer
+        format: int32
+      message:
+        type: string
+      fields:
+        type: string
